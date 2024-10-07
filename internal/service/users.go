@@ -70,24 +70,7 @@ func (s *usersService) SignUp(ctx context.Context, input UserRegisterInput, devi
 		return Tokens{}, err
 	}
 
-	accessToken, err := s.tokenManager.NewJWT(user.ID, s.accessTokenTTL)
-	if err != nil {
-		return Tokens{}, err
-	}
-	refreshToken, err := s.tokenManager.NewRefreshToken()
-	if err != nil {
-		return Tokens{}, err
-	}
-
-	err = s.authRepo.SaveRefreshToken(ctx, user.ID, refreshToken, time.Now().Add(s.refreshTokenTTL), deviceinfo)
-	if err != nil {
-		return Tokens{}, err
-	}
-
-	return Tokens{
-		AccessToken:  accessToken,
-		RefreshToken: refreshToken,
-	}, nil
+	return s.generateTokens(ctx, user.ID, deviceinfo)
 }
 func (s *usersService) SignIn(ctx context.Context, input UserLoginInput, deviceInfo string) (Tokens, error) {
 	passwordHash, err := s.hasher.Hash(input.Password)
@@ -98,24 +81,7 @@ func (s *usersService) SignIn(ctx context.Context, input UserLoginInput, deviceI
 	if err != nil {
 		return Tokens{}, err
 	}
-	accessToken, err := s.tokenManager.NewJWT(user.ID, s.accessTokenTTL)
-	if err != nil {
-		return Tokens{}, err
-	}
-	refreshToken, err := s.tokenManager.NewRefreshToken()
-	if err != nil {
-		return Tokens{}, err
-	}
-
-	err = s.authRepo.SaveRefreshToken(ctx, user.ID, refreshToken, time.Now().Add(s.refreshTokenTTL), deviceInfo)
-	if err != nil {
-		return Tokens{}, err
-	}
-
-	return Tokens{
-		AccessToken:  accessToken,
-		RefreshToken: refreshToken,
-	}, nil
+	return s.generateTokens(ctx, user.ID, deviceInfo)
 }
 
 func (s *usersService) RefreshTokens(ctx context.Context, refreshToken string, deviceInfo string) (Tokens, error) {
@@ -128,6 +94,9 @@ func (s *usersService) RefreshTokens(ctx context.Context, refreshToken string, d
 		return Tokens{}, err
 	}
 
+	return s.generateTokens(ctx, userID, deviceInfo)
+}
+func (s *usersService)generateTokens(ctx context.Context, userID int, deviceInfo string) (Tokens, error){
 	accessToken, err := s.tokenManager.NewJWT(userID, time.Hour*1)
 	if err != nil {
 		return Tokens{}, err
