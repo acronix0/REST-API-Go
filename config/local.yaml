@@ -1,0 +1,27 @@
+env: "local" # dev, prod
+
+database:
+  host: "194.226.121.108"
+  port: "5432"
+  name: "dm-trade-test"
+  username: "postgres"
+  password: "89872010serg="
+
+http_server:
+  host: "localhost"
+  port: "8080"
+  read_timeout: "5s"
+  write_timeout: "10s"
+  max_header_megabytes: 10
+
+auth:
+  jwt:
+    access_token_ttl: "720h"
+    refresh_token_ttl: "1900h"
+    secret: "giwfFga9h7bShimoLxZ8pVGlKGyIzgDo7saYg5Ljkt8="
+  password_salt: "yoursecretsalt"
+
+jwt:
+  access_token_ttl: "15m"
+  refresh_token_ttl: "24h"
+  secret: "giwfFga9h7bShimoLxZ8pVGlKGyIzgDo7saYg5Ljkt8="
