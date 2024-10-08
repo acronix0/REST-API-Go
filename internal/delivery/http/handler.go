@@ -11,10 +11,10 @@ import (
 )
 
 type Handler struct {
-	services *service.Services
+	services service.ServiceManager
 	tokenManager auth.TokenManager
 }
-func NewHandler(service *service.Services, tokenManager auth.TokenManager) *Handler{
+func NewHandler(service service.ServiceManager, tokenManager auth.TokenManager) *Handler{
 	return &Handler{services: service, tokenManager: tokenManager}
 }
 

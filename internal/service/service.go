@@ -56,24 +56,15 @@ type Orders interface {
 	Create(ctx context.Context, orderInput CreateOrderInput) error
 	GetByUserId(ctx context.Context, userId int) ([]domain.Order, error)
 }
-type Import interface {
+type Imports interface {
   ImportCategories(ctx context.Context, categories []domain.Category) error
   ImportProducts(ctx context.Context, products []domain.Product) error
 }
-type Deps struct{
-	Repos *repository.Repositories
-	TokenManager auth.TokenManager
-	Hasher       hash.PasswordHasher
-	AccessTokenTTL   time.Duration
-	RefreshTokenTTL time.Duration
-}
-type Services struct{
-	Categories Categories
-	Products Products
-	Orders Orders
-	Users Users
-	Import Import
-}
+
+
+
+
+
 type ProductInput struct {
 	ID       int     `json:"product_id"`
 	Article  string  `json:"product_article"`
@@ -93,19 +84,63 @@ type CreateOrderInput struct {
 	Address        string         `json:"address"`
 	Comment        string         `json:"comment"`
 }
-func NewServices(deps Deps) (*Services, error){
+
+ type Deps struct{
+	Repos *repository.Repositories
+	TokenManager auth.TokenManager
+	Hasher       hash.PasswordHasher
+	AccessTokenTTL   time.Duration
+	RefreshTokenTTL time.Duration
+}
+
+func NewServices(deps Deps) (ServiceManager, error){
 	importService := NewImportsService(deps.Repos.Category, deps.Repos.Product)
 	userService := NewUsersService( deps.Hasher, deps.Repos.User, deps.Repos.Auth, deps.AccessTokenTTL, deps.RefreshTokenTTL)
 	productService := NewProductsService(deps.Repos.Product)
 	orderService := NewOrdersService(deps.Repos.Order)
 	categoriesService := NewCategoriesService(deps.Repos.Category)
-	return &Services{
-		Users: userService, 
-		Categories: categoriesService,
-		Products: productService,
-    Orders: orderService,
-		Import: importService,
+	return &services{
+		users: userService, 
+		categories: categoriesService,
+		products: productService,
+    orders: orderService,
+		imports: importService,
 	}, nil
 }
 
 
+type ServiceManager interface {
+	Categories() Categories
+	Products() Products
+	Orders() Orders
+	Users() Users
+	Imports() Imports
+}
+type services struct{
+	categories Categories
+	products Products
+	orders Orders
+	users Users
+	imports Imports
+}
+
+func (s *services) Categories() Categories {
+	return s.categories
+}
+
+func (s *services) Products() Products {
+	return s.products
+}
+
+func (s *services) Orders() Orders {
+	return s.orders
+}
+
+func (s *services) Users() Users {
+
+	return s.users
+}
+
+func (s *services) Imports() Imports {
+	return s.imports
+}

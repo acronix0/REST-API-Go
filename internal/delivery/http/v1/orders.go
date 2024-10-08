@@ -30,7 +30,7 @@ func(h *Handler) getUserOrders(c *gin.Context){
     newResponse(c, http.StatusUnauthorized, "Invalid user ID")
     return
   }
-	orders, err := h.services.Orders.GetByUserId(c.Request.Context(), userID)
+	orders, err := h.services.Orders().GetByUserId(c.Request.Context(), userID)
   if err!= nil {
     newResponse(c, http.StatusInternalServerError, "Failed to get user orders")
     return
@@ -61,7 +61,7 @@ func(h *Handler) createOrder(c *gin.Context){
     return
   }
 	input.UserID = userID
-	err = h.services.Orders.Create(c.Request.Context(),input)
+	err = h.services.Orders().Create(c.Request.Context(),input)
   if err!= nil {
     newResponse(c, http.StatusInternalServerError, "Failed to get user orders")
     return

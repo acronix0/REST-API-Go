@@ -26,7 +26,7 @@ func (h *Handler) authorizeRole(allowedRoles ...string) gin.HandlerFunc{
 			newResponse(c, http.StatusUnauthorized, "userID is of invalid type")
       return
     }
-		role, err := h.services.Users.GetUserRole(c.Request.Context(), userIDInt)
+		role, err := h.services.Users().GetUserRole(c.Request.Context(), userIDInt)
 		if err != nil {
 			newResponse(c, http.StatusForbidden, "forbidden")
       return

@@ -44,7 +44,7 @@ func (h *Handler) register(c *gin.Context){
     return
   }
 	userAgent := c.GetHeader("User-Agent")
-  tokens,err := h.services.Users.SignUp(c.Request.Context(), user,userAgent, clientRole)
+  tokens,err := h.services.Users().SignUp(c.Request.Context(), user,userAgent, clientRole)
   if err!= nil {
     newResponse(c, http.StatusBadRequest,"Register failed")
     return
@@ -73,7 +73,7 @@ func (h *Handler) registerAdmin(c *gin.Context){
     return
   }
 	userAgent := c.GetHeader("User-Agent")
-  tokens,err := h.services.Users.SignUp(c.Request.Context(), user,userAgent, adminRole)
+  tokens,err := h.services.Users().SignUp(c.Request.Context(), user,userAgent, adminRole)
   if err!= nil {
     newResponse(c, http.StatusBadRequest,"Register failed")
     return
@@ -98,7 +98,7 @@ func (h *Handler) login(c *gin.Context) {
     return
   }
 	userAgent := c.GetHeader("User-Agent")
-  tokens, err := h.services.Users.SignIn(c.Request.Context(), user, userAgent)
+  tokens, err := h.services.Users().SignIn(c.Request.Context(), user, userAgent)
   if err!= nil {
     newResponse(c, http.StatusUnauthorized, "Login failed")
     return
@@ -127,7 +127,7 @@ func (h *Handler) resetPassword(c *gin.Context) {
     return
   }
 	
-	if err:= h.services.Users.ChangePassword(c.Request.Context(), id,newPassword);err != nil {
+	if err:= h.services.Users().ChangePassword(c.Request.Context(), id,newPassword);err != nil {
 		newResponse(c, http.StatusBadRequest,"Reset password failed")
 		return
 	}
@@ -157,7 +157,7 @@ func (h *Handler) refreshToken(c *gin.Context) {
 	}
 	userAgent := c.GetHeader("User-Agent")
 			
-	tokens, err := h.services.Users.RefreshTokens(c.Request.Context(), refreshToken,userAgent)
+	tokens, err := h.services.Users().RefreshTokens(c.Request.Context(), refreshToken,userAgent)
 	if err != nil {
 			newResponse(c, http.StatusInternalServerError, "Failed to refresh tokens")
 	    return

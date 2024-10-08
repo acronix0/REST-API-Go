@@ -6,11 +6,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 type Handler struct {
-	services     *service.Services
+	services     service.ServiceManager
 	tokenManager auth.TokenManager
 }
 
-func NewHandler(services *service.Services, tokenManager auth.TokenManager) *Handler {
+func NewHandler(services service.ServiceManager, tokenManager auth.TokenManager) *Handler {
 	return &Handler{
 		services:     services,
 		tokenManager: tokenManager,

@@ -46,7 +46,7 @@ func (h *Handler) getUserProfile(c *gin.Context) {
 		return
 	}
 
-	user, err := h.services.Users.GetByID(c.Request.Context(), id)
+	user, err := h.services.Users().GetByID(c.Request.Context(), id)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			newResponse(c, http.StatusNotFound, "User not found")	
@@ -69,7 +69,7 @@ func (h *Handler) getUserProfile(c *gin.Context) {
 // @Failure 500 {object} response
 // @Router /users [get]
 func(h *Handler) getUsers(c *gin.Context){
-	users, err := h.services.Users.GetUsers(c.Request.Context())
+	users, err := h.services.Users().GetUsers(c.Request.Context())
   if err!= nil {
     newResponse(c, http.StatusInternalServerError, "Failed to get users")
     return
@@ -95,7 +95,7 @@ func(h *Handler) blockUser(c *gin.Context){
     return
   }
 
-	err = h.services.Users.Block(c.Request.Context(), userID)
+	err = h.services.Users().Block(c.Request.Context(), userID)
 	if err != nil {
 		newResponse(c, http.StatusInternalServerError, "Failed to unblock user")
 		return
@@ -120,7 +120,7 @@ func(h *Handler) unblockUser(c *gin.Context){
     newResponse(c, http.StatusBadRequest, "Invalid user ID")
     return
   }
-	err = h.services.Users.Unblock(c.Request.Context(), userID)
+	err = h.services.Users().Unblock(c.Request.Context(), userID)
 	if err != nil {
 		newResponse(c, http.StatusInternalServerError, "Failed to unblock user")
 		return
@@ -153,7 +153,7 @@ func (h *Handler) updateProfile(c *gin.Context){
     return
   }
 
-	if err := h.services.Users.UpdateProfile(c.Request.Context(), id, input); err!=nil{
+	if err := h.services.Users().UpdateProfile(c.Request.Context(), id, input); err!=nil{
 		newResponse(c, http.StatusInternalServerError, "Failed to update user")
     return
 	}
@@ -185,7 +185,7 @@ func (h *Handler) updatePassword(c *gin.Context){
     return
   }
 
-	if err := h.services.Users.ChangePassword(c.Request.Context(), id, newPass); err!=nil{
+	if err := h.services.Users().ChangePassword(c.Request.Context(), id, newPass); err!=nil{
 		newResponse(c, http.StatusInternalServerError, "Failed to change password")
     return
 	}

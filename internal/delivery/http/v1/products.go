@@ -24,7 +24,7 @@ func (h *Handler) initProductsRoutes(api *gin.RouterGroup){
 // @Failure 500 {object} response
 // @Router /products [get]
 func(h *Handler) getProducts(c *gin.Context){
-	products, err := h.services.Products.GetProducts(c.Request.Context())
+	products, err := h.services.Products().GetProducts(c.Request.Context())
   if err!= nil {
     newResponse(c, http.StatusInternalServerError, "Failed to get products")
     return
@@ -48,7 +48,7 @@ func (h *Handler) searchProducts(c *gin.Context){
     newResponse(c, http.StatusBadRequest, "Invalid input")
     return
   }
-  products, err := h.services.Products.GetByCredentials(c.Request.Context(),input)
+  products, err := h.services.Products().GetByCredentials(c.Request.Context(),input)
   if err!= nil {
     newResponse(c, http.StatusInternalServerError, "Failed to search products")
     return

@@ -22,7 +22,7 @@ func (h *Handler) initCategoriesRoutes(api *gin.RouterGroup){
 // @Failure 500 {object} response
 // @Router /users [get]
 func(h *Handler) getCategories(c *gin.Context){
-	categories, err := h.services.Categories.GetCategories(c.Request.Context())
+	categories, err := h.services.Categories().GetCategories(c.Request.Context())
   if err!= nil {
     newResponse(c, http.StatusInternalServerError, "Failed to get categories")
     return
