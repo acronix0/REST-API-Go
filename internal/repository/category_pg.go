@@ -30,7 +30,7 @@ func (r *categoryRepo) GetCategories(ctx context.Context) ([]domain.Category, er
 	var categories []domain.Category
 	for rows.Next() {
 		var category domain.Category
-		err := rows.Scan(&category.ID, &category.Article, &category.Image)
+		err := rows.Scan(&category.ID, &category.Article,&category.Name, &category.Image)
 		if err != nil {
 			return nil, err
 		}

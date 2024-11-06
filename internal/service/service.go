@@ -2,12 +2,15 @@ package service
 
 import (
 	"context"
+	"mime/multipart"
 	"time"
 
 	"github.com/acronix0/REST-API-Go/internal/domain"
 	"github.com/acronix0/REST-API-Go/internal/repository"
 	"github.com/acronix0/REST-API-Go/pkg/auth"
 	"github.com/acronix0/REST-API-Go/pkg/hash"
+	pb "github.com/acronix0/REST-API-Go-protos/gen/go/auth"
+
 )
 
 type UserRegisterInput struct {
@@ -57,8 +60,10 @@ type Orders interface {
 	GetByUserId(ctx context.Context, userId int) ([]domain.Order, error)
 }
 type Imports interface {
-  ImportCategories(ctx context.Context, categories []domain.Category) error
-  ImportProducts(ctx context.Context, products []domain.Product) error
+/*   ImportCategories(ctx context.Context, categories []domain.Category) error
+  ImportProducts(ctx context.Context, products []domain.Product) error */
+	Parse(file1, file2 *multipart.File) error
+	ImportPicture(file *multipart.File) error
 }
 
 
@@ -91,11 +96,12 @@ type CreateOrderInput struct {
 	Hasher       hash.PasswordHasher
 	AccessTokenTTL   time.Duration
 	RefreshTokenTTL time.Duration
+	AuthClient  pb.AuthClient
 }
 
 func NewServices(deps Deps) (ServiceManager, error){
 	importService := NewImportsService(deps.Repos.Category, deps.Repos.Product)
-	userService := NewUsersService( deps.Hasher, deps.Repos.User, deps.Repos.Auth, deps.AccessTokenTTL, deps.RefreshTokenTTL)
+	userService := NewUsersService( deps.AuthClient,deps.Hasher, deps.Repos.User, deps.Repos.Auth, deps.AccessTokenTTL, deps.RefreshTokenTTL)
 	productService := NewProductsService(deps.Repos.Product)
 	orderService := NewOrdersService(deps.Repos.Order)
 	categoriesService := NewCategoriesService(deps.Repos.Category)

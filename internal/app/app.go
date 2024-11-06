@@ -19,10 +19,23 @@ import (
 	"github.com/acronix0/REST-API-Go/internal/service"
 	"github.com/acronix0/REST-API-Go/pkg/auth"
 	"github.com/acronix0/REST-API-Go/pkg/hash"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+	pb "github.com/acronix0/REST-API-Go-protos/gen/go/auth"
 )
 
 
+// @title dm-trade API
+// @version 1.0
+// @description This is a sample server API.
+// @termsOfService http://example.com/terms/
 
+// @host localhost:8081
+// @BasePath /api/v1
+
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
 func Run(configPath string) {
 	cfg := config.MustLoad(configPath)
 	fmt.Println(cfg)
@@ -39,10 +52,18 @@ func Run(configPath string) {
 	hasher := hash.NewSHA1Hasher(cfg.AuthConfig.PasswordSalt)
 	
 	repos := repository.NewRepositories(postgreClient.GetDB())
+	AuthServiceConn, err := grpc.NewClient("localhost:4404",grpc.WithTransportCredentials(insecure.NewCredentials()))
+	authGrpcClient :=  pb.NewAuthClient(AuthServiceConn)
+	if err != nil {
+		log.Error(err.Error())
+	}
 	services, err := service.NewServices(service.Deps{
 		Repos: repos,
 		TokenManager: tokenManager,
 		Hasher: hasher,
+		AccessTokenTTL: cfg.AuthConfig.JWT.AccessTokenTTL,
+		RefreshTokenTTL: cfg.JWTConfig.RefreshTokenTTL,
+		AuthClient: authGrpcClient,
 	})
 	if err != nil {
 		log.Error(err.Error())

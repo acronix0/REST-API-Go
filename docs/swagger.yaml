@@ -1,0 +1,758 @@
+basePath: /api/v1
+definitions:
+  domain.Category:
+    properties:
+      article:
+        type: string
+      id:
+        type: integer
+      image:
+        type: string
+      name:
+        type: string
+    type: object
+  domain.GetProductsQuery:
+    properties:
+      in_stock:
+        type: boolean
+      limit:
+        type: integer
+      max_price:
+        type: integer
+      min_price:
+        type: integer
+      search:
+        type: string
+      skip:
+        type: integer
+      sorted_type:
+        type: integer
+    type: object
+  domain.Order:
+    properties:
+      User:
+        $ref: '#/definitions/domain.User'
+      address:
+        type: string
+      comment:
+        type: string
+      deliveryType:
+        type: string
+      id:
+        type: integer
+      orderDate:
+        type: string
+      products:
+        items:
+          $ref: '#/definitions/domain.OrderProduct'
+        type: array
+      recipientEmail:
+        type: string
+      recipientName:
+        type: string
+      recipientPhone:
+        type: string
+      totalPrice:
+        type: number
+      userId:
+        type: integer
+    type: object
+  domain.OrderProduct:
+    properties:
+      order:
+        $ref: '#/definitions/domain.Order'
+      orderId:
+        type: integer
+      product:
+        $ref: '#/definitions/domain.Product'
+      productId:
+        type: integer
+      quantity:
+        type: integer
+      totalPrice:
+        type: number
+    type: object
+  domain.Product:
+    properties:
+      article:
+        type: string
+      categoryId:
+        type: integer
+      id:
+        type: integer
+      image:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
+      quantity:
+        type: integer
+    type: object
+  domain.User:
+    properties:
+      blocked:
+        type: boolean
+      email:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      password:
+        type: string
+      phone:
+        type: string
+      role:
+        type: string
+    type: object
+  service.CreateOrderInput:
+    properties:
+      address:
+        type: string
+      comment:
+        type: string
+      delivery_type:
+        type: string
+      id:
+        type: integer
+      products:
+        items:
+          $ref: '#/definitions/service.ProductInput'
+        type: array
+      recipient_email:
+        type: string
+      recipient_name:
+        type: string
+      recipient_phone:
+        type: string
+      total_price:
+        type: number
+      user_id:
+        type: integer
+    type: object
+  service.ProductInput:
+    properties:
+      image:
+        type: string
+      price:
+        type: number
+      product_article:
+        type: string
+      product_id:
+        type: integer
+      quantity:
+        type: integer
+    type: object
+  service.Tokens:
+    properties:
+      accessToken:
+        type: string
+      refreshToken:
+        type: string
+    type: object
+  service.UpdateUserInput:
+    properties:
+      email:
+        type: string
+      id:
+        type: integer
+      name:
+        minLength: 3
+        type: string
+      phone:
+        minLength: 9
+        type: string
+    required:
+    - id
+    type: object
+  service.UserLoginInput:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  service.UserRegisterInput:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        minLength: 8
+        type: string
+      phone:
+        type: string
+    required:
+    - email
+    - name
+    - password
+    - phone
+    type: object
+  v1.response:
+    properties:
+      message:
+        type: string
+    type: object
+host: localhost:8081
+info:
+  contact: {}
+  description: This is a sample server API.
+  termsOfService: http://example.com/terms/
+  title: dm-trade API
+  version: "1.0"
+paths:
+  /{id}/block:
+    patch:
+      description: Block User
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+      security:
+      - UsersAuth: []
+      summary: Block User
+      tags:
+      - users
+  /{id}/unblock:
+    patch:
+      description: Unblock User
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+      security:
+      - UsersAuth: []
+      summary: Unblock user
+      tags:
+      - users
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user and get JWT tokens
+      parameters:
+      - description: Login Data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/service.UserLoginInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Tokens for the authenticated user
+          schema:
+            $ref: '#/definitions/service.Tokens'
+        "400":
+          description: Invalid credentials
+          schema:
+            $ref: '#/definitions/v1.response'
+        "401":
+          description: Login failed
+          schema:
+            $ref: '#/definitions/v1.response'
+      summary: User Login
+      tags:
+      - auth
+  /auth/password-reset:
+    patch:
+      consumes:
+      - application/json
+      description: Reset password for the authenticated user
+      parameters:
+      - description: New password
+        in: body
+        name: newPassword
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Password successfully reset
+          schema:
+            $ref: '#/definitions/v1.response'
+        "400":
+          description: Invalid user ID or invalid credentials
+          schema:
+            $ref: '#/definitions/v1.response'
+      security:
+      - APiKeyAuth: []
+      summary: Reset Password
+      tags:
+      - auth
+  /auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Refresh the access token using a valid refresh token
+      parameters:
+      - description: Refresh Token
+        in: body
+        name: input
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: New access and refresh tokens
+          schema:
+            $ref: '#/definitions/service.Tokens'
+        "400":
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/v1.response'
+        "401":
+          description: Invalid or expired refresh token
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Failed to refresh tokens
+          schema:
+            $ref: '#/definitions/v1.response'
+      summary: Refresh Access Token
+      tags:
+      - auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user with client role
+      parameters:
+      - description: User Registration Data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/service.UserRegisterInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.Tokens'
+        "400":
+          description: Invalid input or registration failed
+          schema:
+            $ref: '#/definitions/v1.response'
+      summary: User Registration
+      tags:
+      - auth
+  /auth/register-admin:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user with admin role
+      parameters:
+      - description: Admin Registration Data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/service.UserRegisterInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Tokens for the authenticated admin
+          schema:
+            $ref: '#/definitions/service.Tokens'
+        "400":
+          description: Invalid input or registration failed
+          schema:
+            $ref: '#/definitions/v1.response'
+      summary: Admin Registration
+      tags:
+      - auth
+  /categories:
+    get:
+      description: Get categories
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              items:
+                $ref: '#/definitions/domain.Category'
+              type: array
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+      summary: Get categories
+      tags:
+      - categories
+  /imports/import-picture:
+    post:
+      consumes:
+      - multipart/form-data
+      description: This endpoint allows you to upload image file
+      parameters:
+      - description: Image file (jpg, png, jpg)
+        in: formData
+        name: image
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      summary: Import image
+      tags:
+      - import
+  /imports/import-xmls:
+    post:
+      consumes:
+      - multipart/form-data
+      description: 'This endpoint allows you to upload two XML files: import.xml for
+        product data and offers.xml for offer data.'
+      parameters:
+      - description: XML file containing product data
+        in: formData
+        name: import.xml
+        required: true
+        type: file
+      - description: XML file containing offer data
+        in: formData
+        name: offers.xml
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful import
+          schema:
+            type: string
+        "400":
+          description: Error in file upload
+          schema:
+            type: string
+      summary: Import products and offers
+      tags:
+      - import
+  /orders:
+    get:
+      description: Get categories
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              items:
+                $ref: '#/definitions/domain.Order'
+              type: array
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+      summary: Get user orders
+      tags:
+      - orders
+    post:
+      consumes:
+      - application/json
+      description: create order
+      parameters:
+      - description: User Registration Data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateOrderInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+      summary: Create order
+      tags:
+      - orders
+  /products:
+    get:
+      description: Get Products
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              items:
+                $ref: '#/definitions/domain.Product'
+              type: array
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+      summary: Get Products
+      tags:
+      - products
+  /products/search:
+    post:
+      consumes:
+      - application/json
+      description: Search for products based on various filters and pagination
+      parameters:
+      - description: Search and filter parameters
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/domain.GetProductsQuery'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              items:
+                $ref: '#/definitions/domain.Product'
+              type: array
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+      summary: Search Products
+      tags:
+      - products
+  /users:
+    get:
+      description: Get profiles of users
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              items:
+                $ref: '#/definitions/domain.User'
+              type: array
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+      security:
+      - UsersAuth: []
+      summary: Get Users Profiles
+      tags:
+      - users
+    patch:
+      description: Update user profile information (excluding password)
+      parameters:
+      - description: User data
+        in: body
+        name: userInput
+        required: true
+        schema:
+          $ref: '#/definitions/service.UpdateUserInput'
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+      security:
+      - UsersAuth: []
+      summary: Update User Data
+      tags:
+      - users
+  /users/password:
+    patch:
+      description: change user password
+      parameters:
+      - description: new password
+        in: body
+        name: password
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+      security:
+      - UsersAuth: []
+      summary: Change user password
+      tags:
+      - users
+  /users/profile:
+    get:
+      consumes:
+      - application/json
+      description: Get profile of authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.User'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/v1.response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+      security:
+      - UsersAuth: []
+      summary: Get User Profile
+      tags:
+      - users
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

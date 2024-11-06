@@ -28,8 +28,8 @@ func (h *Handler)initAuthsRoute(api *gin.RouterGroup) {
 // @Tags auth
 // @Accept json
 // @Produce json
-// @Param input body UserRegisterInput true "User Registration Data"
-// @Success 200 {object} Tokens
+// @Param input body service.UserRegisterInput true "User Registration Data"
+// @Success 200 {object} service.Tokens
 // @Failure 400 {object} response "Invalid input or registration failed"
 // @Router /auth/register [post]
 func (h *Handler) register(c *gin.Context){
@@ -46,7 +46,7 @@ func (h *Handler) register(c *gin.Context){
 	userAgent := c.GetHeader("User-Agent")
   tokens,err := h.services.Users().SignUp(c.Request.Context(), user,userAgent, clientRole)
   if err!= nil {
-    newResponse(c, http.StatusBadRequest,"Register failed")
+    newResponse(c, http.StatusInternalServerError,"Register failed")
     return
   }
   c.JSON(http.StatusOK, tokens)
@@ -57,8 +57,8 @@ func (h *Handler) register(c *gin.Context){
 // @Tags auth
 // @Accept json
 // @Produce json
-// @Param input body UserRegisterInput true "Admin Registration Data"
-// @Success 200 {object} Tokens "Tokens for the authenticated admin"
+// @Param input body service.UserRegisterInput true "Admin Registration Data"
+// @Success 200 {object} service.Tokens "Tokens for the authenticated admin"
 // @Failure 400 {object} response "Invalid input or registration failed"
 // @Router /auth/register-admin [post]
 func (h *Handler) registerAdmin(c *gin.Context){
@@ -86,8 +86,8 @@ func (h *Handler) registerAdmin(c *gin.Context){
 // @Tags auth
 // @Accept json
 // @Produce json
-// @Param input body UserLoginInput true "Login Data"
-// @Success 200 {object} Tokens "Tokens for the authenticated user"
+// @Param input body service.UserLoginInput true "Login Data"
+// @Success 200 {object} service.Tokens "Tokens for the authenticated user"
 // @Failure 400 {object} response "Invalid credentials"
 // @Failure 401 {object} response "Login failed"
 // @Router /auth/login [post]
@@ -107,6 +107,7 @@ func (h *Handler) login(c *gin.Context) {
 }
 
 // @Summary Reset Password
+// @Security APiKeyAuth
 // @Description Reset password for the authenticated user
 // @Tags auth
 // @Accept json
@@ -138,8 +139,8 @@ func (h *Handler) resetPassword(c *gin.Context) {
 // @Description Refresh the access token using a valid refresh token
 // @Accept json
 // @Produce json
-// @Param input body struct{RefreshToken string} true "Refresh Token"
-// @Success 200 {object} Tokens "New access and refresh tokens"
+// @Param input body string true "Refresh Token"
+// @Success 200 {object} service.Tokens "New access and refresh tokens"
 // @Failure 400 {object} response "Invalid input"
 // @Failure 401 {object} response "Invalid or expired refresh token"
 // @Failure 500 {object} response "Failed to refresh tokens"

@@ -22,5 +22,8 @@ func (h *Handler) Init(api *gin.RouterGroup) {
 		h.initCategoriesRoutes(v1)
 		h.initUsersRoutes(v1)
 		h.initAuthsRoute(v1)
+		h.initOrdersRoutes(v1)
+		h.InitImportsRoutes(v1)
+		h.initProductsRoutes(v1)
 	}
 }

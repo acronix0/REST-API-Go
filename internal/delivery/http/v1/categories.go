@@ -16,11 +16,11 @@ func (h *Handler) initCategoriesRoutes(api *gin.RouterGroup){
 // @Tags categories
 // @Description Get categories
 // @Produce  json
-// @Success 200 {array} []Category
+// @Success 200 {array} []domain.Category
 // @Failure 401 {object} response
 // @Failure 404 {object} response
 // @Failure 500 {object} response
-// @Router /users [get]
+// @Router /categories [get]
 func(h *Handler) getCategories(c *gin.Context){
 	categories, err := h.services.Categories().GetCategories(c.Request.Context())
   if err!= nil {

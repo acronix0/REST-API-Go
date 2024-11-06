@@ -10,8 +10,10 @@ import (
 	"github.com/acronix0/REST-API-Go/pkg/auth"
 	"github.com/acronix0/REST-API-Go/pkg/hash"
 	"github.com/dgrijalva/jwt-go"
+	pb "github.com/acronix0/REST-API-Go-protos/gen/go/auth"
 )
 type usersService struct {
+	grpcClient pb.AuthClient
 	userRepo repository.User
 	authRepo repository.Auth
 	tokenManager auth.TokenManager
@@ -24,11 +26,13 @@ type Claims struct {
 	UserID int `json:"user_id"`
 	jwt.StandardClaims
 }
-func NewUsersService(hasher hash.PasswordHasher, userRepo repository.User, authRepo repository.Auth, accessTTL time.Duration, refreshTTL time.Duration) *usersService {
+func NewUsersService(authGrpcClient pb.AuthClient,hasher hash.PasswordHasher, userRepo repository.User, authRepo repository.Auth, accessTTL time.Duration, refreshTTL time.Duration) *usersService {
 	return &usersService{
-		userRepo:  userRepo,
-		authRepo:  authRepo,
-		accessTokenTTL:accessTTL,
+		grpcClient: authGrpcClient,
+    hasher:       hasher,
+    userRepo:  userRepo,
+    authRepo:  authRepo,
+    accessTokenTTL: accessTTL,
 		refreshTokenTTL: refreshTTL,
 	}
 }
@@ -55,8 +59,19 @@ func (s *usersService) SignUp(ctx context.Context, input UserRegisterInput, devi
 	if err != nil {
 		return Tokens{}, err
 	}
-
-	user := domain.User{
+	
+	resp,err := s.grpcClient.SignUp(ctx, &pb.SignUpRequest{
+		Email:    input.Email,
+    Password: hashedPassword,
+    DeviceInfo: deviceinfo, 
+    Role: role,
+		Username: input.Name,
+		Phone: input.Phone,
+  })
+	if err != nil {
+		return Tokens{}, err
+	}
+/* 	user := domain.User{
 		Name:     input.Name,
 		Email:    input.Email,
 		Password: hashedPassword,
@@ -68,20 +83,32 @@ func (s *usersService) SignUp(ctx context.Context, input UserRegisterInput, devi
 	err = s.userRepo.Create(ctx, &user)
 	if err != nil {
 		return Tokens{}, err
-	}
+	} 
 
-	return s.generateTokens(ctx, user.ID, deviceinfo)
+	return s.generateTokens(ctx, int(resp.UserId), deviceinfo)*/
+	return Tokens{AccessToken: resp.GetJwtToken(), RefreshToken: resp.GetRefreshToken()}, nil
 }
 func (s *usersService) SignIn(ctx context.Context, input UserLoginInput, deviceInfo string) (Tokens, error) {
-	passwordHash, err := s.hasher.Hash(input.Password)
-	if err!= nil {
-    return Tokens{}, err
-  }
-	user, err := s.userRepo.Login(ctx, input.Email, passwordHash)
+
+
+	hashedPassword, err := s.hasher.Hash(input.Password)
 	if err != nil {
 		return Tokens{}, err
 	}
-	return s.generateTokens(ctx, user.ID, deviceInfo)
+	
+	resp,err := s.grpcClient.SignIn(ctx, &pb.SignInRequest{
+		Email:    input.Email,
+    Password: hashedPassword,
+    DeviceInfo: deviceInfo, 
+  })
+
+
+	/* user, err := s.userRepo.Login(ctx, input.Email, hashedPassword)
+	if err != nil {
+		return Tokens{}, err
+	}
+	return s.generateTokens(ctx, user.ID, deviceInfo) */
+	return Tokens{ AccessToken: resp.GetJwtToken(), RefreshToken: resp.GetRefreshToken()}, nil
 }
 
 func (s *usersService) RefreshTokens(ctx context.Context, refreshToken string, deviceInfo string) (Tokens, error) {

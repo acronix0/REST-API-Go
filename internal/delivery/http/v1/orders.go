@@ -19,7 +19,7 @@ func (h *Handler) initOrdersRoutes(api *gin.RouterGroup){
 // @Tags orders
 // @Description Get categories
 // @Produce  json
-// @Success 200 {array} []Order
+// @Success 200 {array} []domain.Order
 // @Failure 401 {object} response
 // @Failure 404 {object} response
 // @Failure 500 {object} response
@@ -44,6 +44,7 @@ func(h *Handler) getUserOrders(c *gin.Context){
 // @Description create order
 // @Accept  json
 // @Produce  json
+// @Param input body service.CreateOrderInput true "User Registration Data"
 // @Success 200 {string} string "OK"
 // @Failure 401 {object} response
 // @Failure 404 {object} response

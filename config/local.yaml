@@ -1,15 +1,15 @@
 env: "local" # dev, prod
 
 database:
-  host: "194.226.121.108"
+  host: "localhost"
   port: "5432"
-  name: "dm-trade-test"
+  name: "dm-trade"
   username: "postgres"
-  password: "89872010serg="
+  password: "89872010riot!"
 
 http_server:
   host: "localhost"
-  port: "8080"
+  port: "8081"
   read_timeout: "5s"
   write_timeout: "10s"
   max_header_megabytes: 10

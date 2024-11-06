@@ -18,7 +18,7 @@ func (h *Handler) initProductsRoutes(api *gin.RouterGroup){
 // @Tags products
 // @Description Get Products
 // @Produce  json
-// @Success 200 {array} []Product
+// @Success 200 {array} []domain.Product
 // @Failure 401 {object} response
 // @Failure 404 {object} response
 // @Failure 500 {object} response
@@ -37,8 +37,8 @@ func(h *Handler) getProducts(c *gin.Context){
 // @Tags products
 // @Accept json
 // @Produce json
-// @Param input body GetProductsQuery true "Search and filter parameters"
-// @Success 200 {array} Product
+// @Param input body domain.GetProductsQuery true "Search and filter parameters"
+// @Success 200 {array} []domain.Product
 // @Failure 400 {object} response
 // @Failure 500 {object} response
 // @Router /products/search [post]

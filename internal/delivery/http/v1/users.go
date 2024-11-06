@@ -34,7 +34,7 @@ func (h *Handler) initUsersRoutes(api *gin.RouterGroup) {
 // @Description Get profile of authenticated user
 // @Accept  json
 // @Produce  json
-// @Success 200 {object} User
+// @Success 200 {object} domain.User
 // @Failure 401 {object} response
 // @Failure 404 {object} response
 // @Failure 500 {object} response
@@ -63,7 +63,7 @@ func (h *Handler) getUserProfile(c *gin.Context) {
 // @Tags users
 // @Description Get profiles of users
 // @Produce  json
-// @Success 200 {array} []User
+// @Success 200 {array} []domain.User
 // @Failure 401 {object} response
 // @Failure 404 {object} response
 // @Failure 500 {object} response
@@ -132,8 +132,7 @@ func(h *Handler) unblockUser(c *gin.Context){
 // @Security UsersAuth
 // @Tags users
 // @Description Update user profile information (excluding password)
-// @Param id body int true "User ID"
-// @Param userInput body updateUserInput true "User data"
+// @Param userInput body service.UpdateUserInput true "User data"
 // @Success 200 {string} string "OK"
 // @Failure 400 {object} response
 // @Failure 401 {object} response
@@ -164,8 +163,7 @@ func (h *Handler) updateProfile(c *gin.Context){
 // @Security UsersAuth
 // @Tags users
 // @Description change user password
-// @Param id path int true "User ID"
-// @Param input body  true "New password"
+// @Param password body string true "new password"
 // @Success 200 {string} string "OK"
 // @Failure 400 {object} response
 // @Failure 401 {object} response
