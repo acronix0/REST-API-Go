@@ -11,9 +11,12 @@ import (
 	"syscall"
 	"time"
 
+	pb "github.com/acronix0/REST-API-Go-protos/gen/go/auth"
+	"github.com/acronix0/REST-API-Go/internal/cache"
 	"github.com/acronix0/REST-API-Go/internal/config"
 	"github.com/acronix0/REST-API-Go/internal/database"
 	delivery "github.com/acronix0/REST-API-Go/internal/delivery/http"
+	"github.com/acronix0/REST-API-Go/internal/kafka"
 	"github.com/acronix0/REST-API-Go/internal/repository"
 	server "github.com/acronix0/REST-API-Go/internal/server"
 	"github.com/acronix0/REST-API-Go/internal/service"
@@ -21,9 +24,7 @@ import (
 	"github.com/acronix0/REST-API-Go/pkg/hash"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	pb "github.com/acronix0/REST-API-Go-protos/gen/go/auth"
 )
-
 
 // @title dm-trade API
 // @version 1.0
@@ -50,13 +51,18 @@ func Run(configPath string) {
 		log.Error(err.Error())
 	}
 	hasher := hash.NewSHA1Hasher(cfg.AuthConfig.PasswordSalt)
-	
-	repos := repository.NewRepositories(postgreClient.GetDB())
+	redisCache, err := cache.NewRedisCache(cfg.RedisConfig.Url, cfg.RedisConfig.Password, cfg.RedisConfig.DB)
+	if err != nil {
+		log.Error(err.Error())
+	}
+	repos := repository.NewRepositories(postgreClient.GetDB(),redisCache)
 	AuthServiceConn, err := grpc.NewClient("localhost:4404",grpc.WithTransportCredentials(insecure.NewCredentials()))
 	authGrpcClient :=  pb.NewAuthClient(AuthServiceConn)
 	if err != nil {
 		log.Error(err.Error())
 	}
+	producer,_ := kafka.NewProducer(cfg.KafkaConfig.Brokers,cfg.KafkaConfig.RetryMax)
+	
 	services, err := service.NewServices(service.Deps{
 		Repos: repos,
 		TokenManager: tokenManager,
@@ -64,6 +70,7 @@ func Run(configPath string) {
 		AccessTokenTTL: cfg.AuthConfig.JWT.AccessTokenTTL,
 		RefreshTokenTTL: cfg.JWTConfig.RefreshTokenTTL,
 		AuthClient: authGrpcClient,
+		KafkaProducer: producer,
 	})
 	if err != nil {
 		log.Error(err.Error())
@@ -75,7 +82,7 @@ func Run(configPath string) {
 			log.Error("error occurred while running http server: %s\n", err.Error())
 		}
 	}()
-
+	
 	log.Info("Server started")
 
 	// Graceful Shutdown

@@ -5,12 +5,12 @@ import (
 	"mime/multipart"
 	"time"
 
+	pb "github.com/acronix0/REST-API-Go-protos/gen/go/auth"
 	"github.com/acronix0/REST-API-Go/internal/domain"
+	"github.com/acronix0/REST-API-Go/internal/kafka"
 	"github.com/acronix0/REST-API-Go/internal/repository"
 	"github.com/acronix0/REST-API-Go/pkg/auth"
 	"github.com/acronix0/REST-API-Go/pkg/hash"
-	pb "github.com/acronix0/REST-API-Go-protos/gen/go/auth"
-
 )
 
 type UserRegisterInput struct {
@@ -60,15 +60,9 @@ type Orders interface {
 	GetByUserId(ctx context.Context, userId int) ([]domain.Order, error)
 }
 type Imports interface {
-/*   ImportCategories(ctx context.Context, categories []domain.Category) error
-  ImportProducts(ctx context.Context, products []domain.Product) error */
 	Parse(file1, file2 *multipart.File) error
 	ImportPicture(file *multipart.File) error
 }
-
-
-
-
 
 type ProductInput struct {
 	ID       int     `json:"product_id"`
@@ -97,6 +91,8 @@ type CreateOrderInput struct {
 	AccessTokenTTL   time.Duration
 	RefreshTokenTTL time.Duration
 	AuthClient  pb.AuthClient
+	KafkaProducer *kafka.KafkaProducer
+	
 }
 
 func NewServices(deps Deps) (ServiceManager, error){
@@ -104,7 +100,7 @@ func NewServices(deps Deps) (ServiceManager, error){
 	userService := NewUsersService( deps.AuthClient,deps.Hasher, deps.Repos.User, deps.Repos.Auth, deps.AccessTokenTTL, deps.RefreshTokenTTL)
 	productService := NewProductsService(deps.Repos.Product)
 	orderService := NewOrdersService(deps.Repos.Order)
-	categoriesService := NewCategoriesService(deps.Repos.Category)
+	categoriesService := NewCategoriesService(deps.Repos.Category, deps.KafkaProducer)
 	return &services{
 		users: userService, 
 		categories: categoriesService,

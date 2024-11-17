@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"time"
 
+	"github.com/acronix0/REST-API-Go/internal/cache"
 	"github.com/acronix0/REST-API-Go/internal/domain"
 )
 type UpdateUserInput struct {
@@ -72,20 +73,26 @@ type Order interface {
 	Create(ctx context.Context, order CreateOrderInput) error
 	GetByUserId(ctx context.Context, userId int) ([]domain.Order, error)
 }
-
+type UserRole interface{
+	Get(ctx context.Context, userID int) (string, error)
+	Set(ctx context.Context, id int, userRole string)  error
+	Delete(ctx context.Context, userID int) error
+}
 type Repositories struct{
 	User User
 	Auth Auth
 	Product Product
 	Category Category
 	Order Order
+	UserCache UserRole
 }
-func NewRepositories(db *sql.DB) *Repositories{
+func NewRepositories(db *sql.DB, cache cache.CacheProvider) *Repositories{
 	return &Repositories{
     User: NewUserRepository(db),
     Auth: NewAuthRepository(db),
     Product: NewProductRepository(db),
     Category: NewCategoryRepository(db),
     Order: NewOrderRepository(db),
+		UserCache: NewUserRoleRepo(cache),
   }
 }

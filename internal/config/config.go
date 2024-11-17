@@ -17,6 +17,8 @@ type Config struct {
 	HTTPConfig    HTTPConfig     `yaml:"http_server"`
 	AuthConfig    AuthConfig     `yaml:"auth"`
 	JWTConfig     JWTConfig      `yaml:"jwt"`
+	KafkaConfig KafkaConfig `yaml:"kafka"`
+	RedisConfig RedisConfig `yaml:"redis"`
 }
 
 type SqlConnection struct {
@@ -46,6 +48,15 @@ type JWTConfig struct {
 	Secret          string        `yaml:"secret"`
 }
 
+type KafkaConfig struct{
+	Brokers []string `yaml:"bootstrap_servers"`
+	RetryMax int `yaml:"retry_max"`
+}
+type RedisConfig struct{
+	Url     string `yaml:"url"`
+	Password string `yaml:"password"`
+	DB        int    `yaml:"db"`
+}
 
 func MustLoad(filePath string) *Config { 
 	if filePath == "" {

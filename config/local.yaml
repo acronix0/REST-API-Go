@@ -25,3 +25,13 @@ jwt:
   access_token_ttl: "15m"
   refresh_token_ttl: "24h"
   secret: "giwfFga9h7bShimoLxZ8pVGlKGyIzgDo7saYg5Ljkt8="
+
+kafka:
+  bootstrap_servers: ["192.168.0.2:9092"]
+  retry_max: 5
+
+cache:
+  redis:
+    url: "redis://localhost:6379/"
+    password: "89872010riot!"
+    db: 0

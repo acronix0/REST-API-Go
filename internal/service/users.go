@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"sync"
 	"time"
 
 	"github.com/acronix0/REST-API-Go/internal/domain"
@@ -16,11 +15,11 @@ type usersService struct {
 	grpcClient pb.AuthClient
 	userRepo repository.User
 	authRepo repository.Auth
+	roleRepo repository.UserRole
 	tokenManager auth.TokenManager
 	accessTokenTTL         time.Duration
 	refreshTokenTTL        time.Duration
 	hasher       hash.PasswordHasher
-	roleCache   sync.Map  
 }
 type Claims struct {
 	UserID int `json:"user_id"`
@@ -175,15 +174,18 @@ func (s *usersService) Unblock(ctx context.Context, userID int) error {
 }
 
 func (s *usersService) GetUserRole(ctx context.Context,userID int) (string, error) {
-  if cachedRole, ok := s.roleCache.Load(userID); ok {
-      return cachedRole.(string), nil
+	cachedRole, err := s.roleRepo.Get(ctx,userID)
+  if  err != nil {
+      return "", err
   }
-
+	if cachedRole != "" {
+    return cachedRole, nil
+  }
   role, err := s.userRepo.GetRoleByUserID(ctx, userID)
   if err != nil {
       return "", err
   }
-  s.roleCache.Store(userID, role)
+  s.roleRepo.Set(ctx, userID, role)
 
   return role, nil
 }
